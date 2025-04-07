@@ -2,16 +2,14 @@ package ulpgc.dacd.control;
 
 import ulpgc.dacd.model.Destination;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class SQLiteDestinationStore implements DestinationStore {
-    private static final String DB_URL = "jdbc:sqlite:destinations.db";
+    private final String dbPath;
 
-    public SQLiteDestinationStore() {
-        try (Connection conn = DriverManager.getConnection(DB_URL)) {
+    public SQLiteDestinationStore(String dbPath) {
+        this.dbPath = dbPath;
+        try (Connection conn = DriverManager.getConnection(dbPath)) {
             String sql = "CREATE TABLE IF NOT EXISTS destination (name TEXT, country TEXT, latitude REAL, longitude REAL, population INTEGER, distance REAL, PRIMARY KEY(name, country))";
             conn.createStatement().execute(sql);
         } catch (SQLException e) {
@@ -21,16 +19,29 @@ public class SQLiteDestinationStore implements DestinationStore {
 
     @Override
     public void storeDestination(Destination destination) {
-        try (Connection conn = DriverManager.getConnection(DB_URL);
-             PreparedStatement stmt = conn.prepareStatement(
+        try (Connection conn = DriverManager.getConnection(dbPath);
+             PreparedStatement checkStmt = conn.prepareStatement(
+                     "SELECT COUNT(*) FROM destination WHERE name = ? AND country = ? AND latitude = ? AND longitude = ? AND population = ? AND distance = ?");
+             PreparedStatement insertStmt = conn.prepareStatement(
                      "INSERT OR REPLACE INTO destination (name, country, latitude, longitude, population, distance) VALUES (?, ?, ?, ?, ?, ?)")) {
-            stmt.setString(1, destination.getName());
-            stmt.setString(2, destination.getCountry());
-            stmt.setDouble(3, destination.getLatitude());
-            stmt.setDouble(4, destination.getLongitude());
-            stmt.setInt(5, destination.getPopulation());
-            stmt.setDouble(6, destination.getDistance());
-            stmt.executeUpdate();
+
+            checkStmt.setString(1, destination.getName());
+            checkStmt.setString(2, destination.getCountry());
+            checkStmt.setDouble(3, destination.getLatitude());
+            checkStmt.setDouble(4, destination.getLongitude());
+            checkStmt.setInt(5, destination.getPopulation());
+            checkStmt.setDouble(6, destination.getDistance());
+
+            ResultSet rs = checkStmt.executeQuery();
+            if (rs.next() && rs.getInt(1) == 0) {
+                insertStmt.setString(1, destination.getName());
+                insertStmt.setString(2, destination.getCountry());
+                insertStmt.setDouble(3, destination.getLatitude());
+                insertStmt.setDouble(4, destination.getLongitude());
+                insertStmt.setInt(5, destination.getPopulation());
+                insertStmt.setDouble(6, destination.getDistance());
+                insertStmt.executeUpdate();
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }

@@ -6,11 +6,24 @@ import java.util.concurrent.TimeUnit;
 
 public class Main {
     public static void main(String[] args) {
-        DestinationProvider provider = new GeoDBCitiesProvider();
-        DestinationStore store = new SQLiteDestinationStore();
+        if (args.length < 4) {
+            System.err.println("Usage: java -jar destination-feeder.jar <API_KEY> <DB_PATH> <LAT> <LON>");
+            return;
+        }
+
+        String apiKey = args[0];
+        String dbPath = "jdbc:sqlite:" + args[1];
+        double latitude = Double.parseDouble(args[2]);
+        double longitude = Double.parseDouble(args[3]);
+
+        String apiHost = "wft-geo-db.p.rapidapi.com";
+        String apiUrl = "https://wft-geo-db.p.rapidapi.com/v1/geo/locations/%s/nearbyCities";
+
+        DestinationProvider provider = new GeoDBCitiesProvider(apiKey, apiHost, apiUrl);
+        DestinationStore store = new SQLiteDestinationStore(dbPath);
         DestinationController controller = new DestinationController(provider, store);
 
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-        scheduler.scheduleAtFixedRate(() -> controller.execute(40.4168, -3.7038), 0, 6, TimeUnit.HOURS);
+        scheduler.scheduleAtFixedRate(() -> controller.execute(latitude, longitude), 0, 6, TimeUnit.HOURS);
     }
 }

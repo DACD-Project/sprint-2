@@ -14,7 +14,7 @@ public class WeatherController {
     public void execute(double lat, double lon) {
         Weather weather = provider.getWeather(lat, lon);
         if (weather != null) {
-            weather.getForecast().forEach(store::storeWeather);
+            weather.getForecast().forEach(entry -> store.storeWeather(entry));
         }
     }
 }

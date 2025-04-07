@@ -14,26 +14,31 @@ import java.util.List;
 
 public class OpenWeatherMapProvider implements WeatherProvider {
     private final HttpClient client = HttpClient.newHttpClient();
-    private static final String API_KEY = "3595e01f2ab2a8c8166796e6f82b1472";
-    private static final String API_URL = "https://api.openweathermap.org/data/2.5/forecast";
+    private final String apiKey;
+    private final String apiUrl;
+
+    public OpenWeatherMapProvider(String apiKey, String apiUrl) {
+        this.apiKey = apiKey;
+        this.apiUrl = apiUrl;
+    }
 
     @Override
     public Weather getWeather(double lat, double lon) {
         try {
-            String url = API_URL + "?lat=" + lat + "&lon=" + lon + "&appid=" + API_KEY + "&units=metric";
+            String url = apiUrl + "?lat=" + lat + "&lon=" + lon + "&appid=" + apiKey + "&units=metric";
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
                     .GET()
                     .build();
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            System.out.println("Código de estado: " + response.statusCode());
-            System.out.println("Respuesta de la API: " + response.body());
+            System.out.println("Status code: " + response.statusCode());
+            System.out.println("API response: " + response.body());
 
             JsonObject json = JsonParser.parseString(response.body()).getAsJsonObject();
             JsonArray forecastList = json.getAsJsonArray("list");
 
             if (forecastList == null) {
-                System.err.println("El campo 'list' es null. JSON completo: " + json);
+                System.err.println("The 'list' field is null. Full JSON: " + json);
                 return null;
             }
 

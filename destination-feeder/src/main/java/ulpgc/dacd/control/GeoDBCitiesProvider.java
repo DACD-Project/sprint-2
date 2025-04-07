@@ -15,9 +15,15 @@ import java.util.Locale;
 
 public class GeoDBCitiesProvider implements DestinationProvider {
     private final HttpClient client = HttpClient.newHttpClient();
-    private static final String API_KEY = "d84afcb97cmsh93a4604313a412fp1b409cjsn7c2f138c5ab9";
-    private static final String HOST = "wft-geo-db.p.rapidapi.com";
-    private static final String API_URL = "https://wft-geo-db.p.rapidapi.com/v1/geo/locations/%s/nearbyCities";
+    private final String apiKey;
+    private final String apiHost;
+    private final String apiUrl;
+
+    public GeoDBCitiesProvider(String apiKey, String apiHost, String apiUrl) {
+        this.apiKey = apiKey;
+        this.apiHost = apiHost;
+        this.apiUrl = apiUrl;
+    }
 
     @Override
     public List<Destination> getDestinations(double lat, double lon) {
@@ -25,24 +31,24 @@ public class GeoDBCitiesProvider implements DestinationProvider {
             String latStr = (lat >= 0 ? "+" : "") + String.format(Locale.US, "%.4f", lat);
             String lonStr = (lon >= 0 ? "+" : "") + String.format(Locale.US, "%.4f", lon);
             String fullLocation = latStr + lonStr;
-            String url = String.format(API_URL, fullLocation);
+            String url = String.format(apiUrl, fullLocation);
 
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
-                    .header("X-RapidAPI-Key", API_KEY)
-                    .header("X-RapidAPI-Host", HOST)
+                    .header("X-RapidAPI-Key", apiKey)
+                    .header("X-RapidAPI-Host", apiHost)
                     .GET()
                     .build();
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            System.out.println("Código de estado: " + response.statusCode());
-            System.out.println("Respuesta de la API: " + response.body());
+            System.out.println("Status code: " + response.statusCode());
+            System.out.println("API response: " + response.body());
 
             JsonObject json = JsonParser.parseString(response.body()).getAsJsonObject();
             JsonArray data = json.getAsJsonArray("data");
 
             if (data == null) {
-                System.err.println("El campo 'data' es null. JSON completo: " + json);
+                System.err.println("The 'data' field is null. Full JSON: " + json);
                 return List.of();
             }
 
