@@ -10,8 +10,12 @@
     <packaging>pom</packaging>
 
     <modules>
+<<<<<<< HEAD
         <module>weather-feeder</module>
         <module>destination-feeder</module>
+=======
+        <module>WeatherFeeder</module>
+>>>>>>> c20f8b6cf0905636e45b7c9d098d91abec7cf904
     </modules>
 
     <properties>
