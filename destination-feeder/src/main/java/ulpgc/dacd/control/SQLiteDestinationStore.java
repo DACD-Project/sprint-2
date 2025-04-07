@@ -1,7 +1,6 @@
 package ulpgc.dacd.control;
 
 import ulpgc.dacd.model.Destination;
-
 import java.sql.*;
 
 public class SQLiteDestinationStore implements DestinationStore {
