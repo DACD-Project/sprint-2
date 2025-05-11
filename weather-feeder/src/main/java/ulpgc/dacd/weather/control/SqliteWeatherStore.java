@@ -1,13 +1,13 @@
-package ulpgc.dacd.control;
+package ulpgc.dacd.weather.control;
 
-import ulpgc.dacd.model.Weather.ForecastEntry;
+import ulpgc.dacd.weather.model.Weather.ForecastEntry;
 
 import java.sql.*;
 
-public class SQLiteWeatherStore implements WeatherStore {
+public class SqliteWeatherStore implements WeatherStore {
     private final String dbPath;
 
-    public SQLiteWeatherStore(String dbPath) {
+    public SqliteWeatherStore(String dbPath) {
         this.dbPath = dbPath;
         try (Connection conn = DriverManager.getConnection(dbPath)) {
             String sql = "CREATE TABLE IF NOT EXISTS weather (timestamp INTEGER PRIMARY KEY, temperature REAL, humidity INTEGER, date_time TEXT)";

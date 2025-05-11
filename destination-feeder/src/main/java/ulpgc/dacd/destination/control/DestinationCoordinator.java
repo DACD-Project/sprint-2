@@ -1,16 +1,15 @@
-package ulpgc.dacd.control;
+package ulpgc.dacd.destination.control;
 
+import ulpgc.dacd.destination.model.Destination;
+
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class Main {
-    public static void main(String[] args) {
-        if (args.length < 4) {
-            System.err.println("Usage: java -jar destination-feeder.jar <API_KEY> <DB_PATH> <LAT> <LON>");
-            return;
-        }
+public class DestinationCoordinator {
 
+    public void run(String[] args) {
         String apiKey = args[0];
         String dbPath = "jdbc:sqlite:" + args[1];
         double latitude = Double.parseDouble(args[2]);
@@ -20,10 +19,14 @@ public class Main {
         String apiUrl = "https://wft-geo-db.p.rapidapi.com/v1/geo/locations/%s/nearbyCities";
 
         DestinationProvider provider = new GeoDBCitiesProvider(apiKey, apiHost, apiUrl);
-        DestinationStore store = new SQLiteDestinationStore(dbPath);
-        DestinationController controller = new DestinationController(provider, store);
+        DestinationStore store = new SqliteDestinationStore(dbPath);
 
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-        scheduler.scheduleAtFixedRate(() -> controller.execute(latitude, longitude), 0, 6, TimeUnit.HOURS);
+        scheduler.scheduleAtFixedRate(() -> {
+            List<Destination> destinations = provider.getDestinations(latitude, longitude);
+            if (!destinations.isEmpty()) {
+                store.storeDestination(destinations.get(0));
+            }
+        }, 0, 6, TimeUnit.HOURS);
     }
 }

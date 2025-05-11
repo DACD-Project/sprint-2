@@ -1,12 +1,12 @@
-package ulpgc.dacd.control;
+package ulpgc.dacd.destination.control;
 
-import ulpgc.dacd.model.Destination;
+import ulpgc.dacd.destination.model.Destination;
 import java.sql.*;
 
-public class SQLiteDestinationStore implements DestinationStore {
+public class SqliteDestinationStore implements DestinationStore {
     private final String dbPath;
 
-    public SQLiteDestinationStore(String dbPath) {
+    public SqliteDestinationStore(String dbPath) {
         this.dbPath = dbPath;
         try (Connection conn = DriverManager.getConnection(dbPath)) {
             String sql = "CREATE TABLE IF NOT EXISTS destination (name TEXT, country TEXT, latitude REAL, longitude REAL, population INTEGER, distance REAL, PRIMARY KEY(name, country))";

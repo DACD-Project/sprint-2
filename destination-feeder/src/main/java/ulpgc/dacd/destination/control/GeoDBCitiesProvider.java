@@ -1,6 +1,6 @@
-package ulpgc.dacd.control;
+package ulpgc.dacd.destination.control;
 
-import ulpgc.dacd.model.Destination;
+import ulpgc.dacd.destination.model.Destination;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;

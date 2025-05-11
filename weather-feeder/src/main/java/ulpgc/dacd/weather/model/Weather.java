@@ -1,4 +1,4 @@
-package ulpgc.dacd.model;
+package ulpgc.dacd.weather.model;
 
 import java.util.List;
 

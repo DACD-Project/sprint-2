@@ -1,6 +1,6 @@
-package ulpgc.dacd.control;
+package ulpgc.dacd.weather.control;
 
-import ulpgc.dacd.model.Weather;
+import ulpgc.dacd.weather.model.Weather;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;

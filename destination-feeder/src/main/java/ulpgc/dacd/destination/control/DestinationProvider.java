@@ -1,6 +1,6 @@
-package ulpgc.dacd.control;
+package ulpgc.dacd.destination.control;
 
-import ulpgc.dacd.model.Destination;
+import ulpgc.dacd.destination.model.Destination;
 import java.util.List;
 
 public interface DestinationProvider {
