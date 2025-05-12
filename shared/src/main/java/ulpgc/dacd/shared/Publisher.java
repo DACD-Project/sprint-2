@@ -1,48 +1,44 @@
 package ulpgc.dacd.shared;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import javax.jms.*;
 import org.apache.activemq.ActiveMQConnectionFactory;
 
-import javax.jms.*;
-import java.time.Instant;
-
 public class Publisher {
-    private final String topic;
-    private final Gson gson;
-    private final ConnectionFactory factory;
 
-    public Publisher(String topic) {
-        this.topic = topic;
-        this.gson = new GsonBuilder()
-                .registerTypeAdapter(Instant.class, (com.google.gson.JsonSerializer<Instant>) (src, typeOfSrc, context) ->
-                        new com.google.gson.JsonPrimitive(src.toString()))
-                .create();
-        this.factory = new ActiveMQConnectionFactory("tcp://localhost:61616");
+    private final String topicName;
+    private final String brokerUrl = "tcp://localhost:61616";
+    private final Gson gson = GsonFactory.create();
+
+    public Publisher(String topicName) {
+        this.topicName = topicName;
     }
 
     public void publish(Object event) {
         Connection connection = null;
+        Session session = null;
+
         try {
+            ConnectionFactory factory = new ActiveMQConnectionFactory(brokerUrl);
             connection = factory.createConnection();
             connection.start();
 
-            Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-            Destination destination = session.createTopic(topic);
-            MessageProducer producer = session.createProducer(destination);
+            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            Topic topic = session.createTopic(topicName);
+            MessageProducer producer = session.createProducer(topic);
+            producer.setDeliveryMode(DeliveryMode.PERSISTENT);
 
             String json = gson.toJson(event);
             TextMessage message = session.createTextMessage(json);
             producer.send(message);
 
-            session.close();
-            producer.close();
-
+            System.out.println("event published to topic [" + topicName + "]: " + json);
         } catch (Exception e) {
-            System.err.println("Failed to publish event to topic: " + topic);
+            System.err.println("error publishing to topic: " + topicName);
             e.printStackTrace();
         } finally {
             try {
+                if (session != null) session.close();
                 if (connection != null) connection.close();
             } catch (JMSException e) {
                 e.printStackTrace();
@@ -50,4 +46,3 @@ public class Publisher {
         }
     }
 }
-
