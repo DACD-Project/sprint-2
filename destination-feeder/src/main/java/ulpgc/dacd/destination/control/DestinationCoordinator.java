@@ -1,6 +1,8 @@
 package ulpgc.dacd.destination.control;
 
 import ulpgc.dacd.destination.model.Destination;
+import ulpgc.dacd.destination.model.DestinationEvent;
+import ulpgc.dacd.shared.Publisher;
 
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -20,12 +22,16 @@ public class DestinationCoordinator {
 
         DestinationProvider provider = new GeoDBCitiesProvider(apiKey, apiHost, apiUrl);
         DestinationStore store = new SqliteDestinationStore(dbPath);
+        Publisher publisher = new Publisher("Destination");
 
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
         scheduler.scheduleAtFixedRate(() -> {
             List<Destination> destinations = provider.getDestinations(latitude, longitude);
             if (!destinations.isEmpty()) {
                 store.storeDestination(destinations.get(0));
+
+                DestinationEvent event = new DestinationEvent("destination-feeder", destinations);
+                publisher.publish(event);
             }
         }, 0, 6, TimeUnit.HOURS);
     }

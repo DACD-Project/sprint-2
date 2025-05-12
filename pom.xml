@@ -12,6 +12,7 @@
     <modules>
         <module>weather-feeder</module>
         <module>destination-feeder</module>
+        <module>shared</module>
     </modules>
 
     <properties>
